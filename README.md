@@ -103,7 +103,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Add Middleware Support
+- [X] Add Middleware Support
 - [ ] Add Support to class resources
 - [ ] Add a http body handler
 - [ ] Add a file handler
