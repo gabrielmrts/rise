@@ -2,8 +2,7 @@ import typing as t
 from rise.response import Response
 from rise.request import Request
 from rise import status
-from rise.http_errors import HTTPError
-from rise.constants import *
+from rise.http_errors import HTTPError, HTTPNotFound
 from rise import types
 
 class App():
@@ -11,20 +10,18 @@ class App():
     _routes = {}
     _start_response: callable = None
     _context: types.RequestContext = types.RequestContext
+    _middlewares: t.List[callable] = []
     
     def __call__(self, env: t.Dict, start_response: t.Callable) -> t.Iterable:
         self._load_context(env)
-
-        response = Response()
-        request = Request()
-
         self._start_response = start_response
 
+        response = Response()
+        request = Request(self._context)
+        
         try:
-            route = self._handle_route(request, response)
-
-            if not route:
-                return EMPTY_BODY
+            [middleware(request, response) for middleware in self._middlewares]
+            self._handle_route(request, response)
         except HTTPError as e:
             start_response(e.status, e.responseHeaders)
             return e.description
@@ -79,8 +76,10 @@ class App():
             else:
                 return handler(req, res, **route_params)
 
-        self._start_response(status.HTTP_404_NOT_FOUND, [('Content-Type', 'text/plain')])
-        return None
+        raise HTTPNotFound("Route not found")
 
     def add_route(self, path: t.AnyStr, resource: t.Callable) -> None: 
         self._routes[path] = resource
+    
+    def add_middleware(self, resource: callable) -> None:
+        self._middlewares.append(resource)
