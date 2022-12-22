@@ -6,8 +6,8 @@ class HTTPError(Exception):
         super().__init__(*args)
         
         self.status = http_status
-        self.description = [description.encode()]
-        self.responseHeaders = [('Content-Type', 'text/plain'), ('Content-Length', str(len(str(self.description))))]
+        self.description = [str(description).encode()]
+        self.responseHeaders = [('Content-Type', 'text/plain'), ('Content-Length', str(len(str(description))))]
 
 class HTTPNotFound(Exception):
 
