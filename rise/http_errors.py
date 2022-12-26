@@ -7,7 +7,7 @@ class HTTPError(Exception):
         
         self.status = http_status
         self.description = [str(description).encode()]
-        self.responseHeaders = [('Content-Type', 'text/plain'), ('Content-Length', str(len(str(description))))]
+        self.headers = [('Content-Type', 'text/plain'), ('Content-Length', str(len(str(description))))]
 
 class HTTPNotFound(Exception):
 
