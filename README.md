@@ -104,7 +104,8 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 ## Roadmap
 
 - [X] Add Middleware Support
-- [ ] Add Support to class resources
+- [X] Add Support to class resources
+- [ ] Add a more efficient response object
 - [ ] Add a http body handler
 - [ ] Add a file handler
 - [ ] Add tests
