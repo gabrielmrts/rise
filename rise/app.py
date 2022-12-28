@@ -1,10 +1,11 @@
+import inspect
 import typing as t
 from rise.response import Response
 from rise.request import Request
 from rise.app_helpers import AppHelpers
 from rise import types
 from rise.http_errors import HTTPError, HTTPNotFound
-import inspect
+from rise import middlewares
 
 class App(AppHelpers):
     
@@ -19,7 +20,7 @@ class App(AppHelpers):
     _context: types.RequestContext = types.RequestContext
 
     # Methods that are called before process all resources
-    _middlewares: t.List[callable] = []
+    _middlewares: t.List[object] = []
 
     # Methods allowed by this framework
     _http_methods = (
@@ -41,27 +42,39 @@ class App(AppHelpers):
             start_response (callable): A WSGI helper function for setting
                 status and headers on a response.
         """
-
         self._load_context(env)
         self._start_response = start_response
 
+        self.add_middleware(middlewares.ResponseFormatterMiddleware())
+
         response = Response()
         request = Request(self._context)
-        
+
+        middlewares_to_call = self._process_middlewares(self._middlewares)
+        self._call_middlewares(middlewares_to_call["before"], request, response)
+
         try:
-            for middleware in self._middlewares:
-                middleware(request, response)
-            self._handle_route(request, response)
+            route = self._handle_route(request)
+            resource = route["handler"]
+            params = route["params"]
+
+            self._call_middlewares(middlewares_to_call["during"], request, response)
+            resource(request, response, **params)
+            self._call_middlewares(middlewares_to_call["after"], request, response)
+
         except HTTPError as e:
             start_response(e.status, e.headers)
             return e.description
 
         self._build_common_headers(response)
-        
         start_response(response.status, response.headers)
-
+        
         return [str(response.body).encode()]
 
+    def _call_middlewares(self, middlewares: list, request: Request, response: Response):
+        for middleware in middlewares:
+            middleware(request, response)
+    
     def _load_context(self, env: dict): 
         request_context = types.RequestContext
         request_headers = types.HTTPHeaders
@@ -76,7 +89,7 @@ class App(AppHelpers):
 
         self._context = request_context
 
-    def _handle_route(self, req, res):
+    def _handle_route(self, req):
         routes = self._routes
         path = self._context.PATH_INFO
         method = req.context.REQUEST_METHOD.lower()
@@ -109,7 +122,7 @@ class App(AppHelpers):
                     if param not in resource_args:
                         route_params.pop(param, None)
 
-                return handler(req, res, **route_params)
+                return {"handler": handler, "params": route_params}
 
         raise HTTPNotFound("Route not found")
 
@@ -123,5 +136,5 @@ class App(AppHelpers):
                 }
                 self._routes[path].update(route)
         
-    def add_middleware(self, resource) -> None:
-        self._middlewares.append(resource)
+    def add_middleware(self, middleware: object) -> None:
+        self._middlewares.append(middleware)
