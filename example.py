@@ -1,7 +1,6 @@
 from rise.app import App    
 from rise.response import Response
 from rise.request import Request
-from rise.http_errors import HTTPNotFound
 from rise import status
 
 app = App()
@@ -9,26 +8,25 @@ app = App()
 class ResourceCollection:
 
     def post(self, req: Request, resp: Response):
-        resp.body = "using a post method"
-        resp.headers = [('Content-Type', 'text/plain')]
-        resp.status = status.HTTP_200_OK
+        resp.body = "*creating a new resource..*"
+        resp.status = status.HTTP_201_CREATED
 
     def get(self, req: Request, resp: Response):
-        resp.body = "using a get method"
-        resp.headers = [('Content-Type', 'text/plain')]
-        resp.status = status.HTTP_200_OK
+        resp.body = {"email": req.context.account_email}
 
 class ResourceWithRouteParams:
 
     def get(self, req: Request, resp: Response, id):
-        resp.body = f"ID: {id}"
-        resp.headers = [('Content-Type', 'text/plain')]
-        resp.status = status.HTTP_200_OK
+        resp.body = f"User ID: {id}"
 
-def mid(req: Request, resp: Response):
-    if req.context.REQUEST_METHOD == "GET":
-        raise HTTPNotFound(description="request invalid")
+class AuthenticationMiddleware():
+    """
+    Middleware to authenticate user
+    """
+    def process_resource(self, req: Request, resp: Response):
+        req.context.account_email = "user@email.com"
 
-#app.add_middleware(mid)
+
+app.add_middleware(AuthenticationMiddleware())
 app.add_route("/user", ResourceCollection())
 app.add_route("/user/<id>", ResourceWithRouteParams())
