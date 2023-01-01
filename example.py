@@ -8,7 +8,7 @@ app = App()
 class ResourceCollection:
 
     def post(self, req: Request, resp: Response):
-        resp.body = "*creating a new resource..*"
+        resp.body = req.context.body_json["hello"]
         resp.status = status.HTTP_201_CREATED
 
     def get(self, req: Request, resp: Response):

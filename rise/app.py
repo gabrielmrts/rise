@@ -1,5 +1,6 @@
 import inspect
 import typing as t
+import json
 from rise.response import Response
 from rise.request import Request
 from rise.app_helpers import AppHelpers
@@ -77,22 +78,28 @@ class App(AppHelpers):
     
     def _load_context(self, env: dict): 
         request_context = types.RequestContext
-        request_headers = types.HTTPHeaders
 
         for key in env:
             if key.startswith("HTTP_"):
-                setattr(request_headers, key, env[key])
+                setattr(request_context, key.lower(), env[key])
             else:
-                setattr(request_context, key, env[key])
+                setattr(request_context, key.lower(), env[key])
 
-        request_context.HTTP_HEADERS = request_headers
+        request_context.http_content_type = env["CONTENT_TYPE"]
+        request_context.body = env["wsgi.input"].read().decode()
+
+        if request_context.http_content_type == "application/json":
+            try:
+                request_context.body_json = json.loads(request_context.body)
+            except:
+                request_context.body_json = {}
 
         self._context = request_context
 
     def _handle_route(self, req):
         routes = self._routes
-        path = self._context.PATH_INFO
-        method = req.context.REQUEST_METHOD.lower()
+        path = self._context.path_info
+        method = req.context.request_method.lower()
 
         for route, methods in routes.items():
             route_segments = route.split('/')
