@@ -1,37 +1,35 @@
 from dataclasses import dataclass
 
 @dataclass
-class HTTPHeaders:
-    
-    HTTP_HOST: str
-    HTTP_CONNECTION: str
-    HTTP_CACHE_CONTROL: str
-    HTTP_SEC_CH_UA: str
-    HTTP_SEC_CH_UA_MOBILE: str
-    HTTP_SEC_CH_UA_PLATFORM: str
-    HTTP_UPGRADE_INSECURE_REQUESTS: str
-    HTTP_USER_AGENT: str
-    HTTP_ACCEPT: str
-    HTTP_SEC_GPC: str
-    HTTP_ACCEPT_LANGUAGE: str
-    HTTP_SEC_FETCH_SITE: str
-    HTTP_SEC_FETCH_MODE: str
-    HTTP_SEC_FETCH_USER: str
-    HTTP_SEC_FETCH_DEST: str
-    HTTP_ACCEPT_ENCODING: str
-
-@dataclass
 class RequestContext:
 
-    SERVER_SOFTWARE: str
-    REQUEST_METHOD: str
-    QUERY_STRING: str
-    RAW_URI: str
-    SERVER_PROTOCOL: str
-    HTTP_HEADERS: HTTPHeaders
-    REMOTE_ADDR: str
-    REMOTE_PORT: str
-    SERVER_NAME: str
-    SERVER_PORT: str
-    PATH_INFO: str
-    SCRIPT_NAME: str
+    server_software: str
+    request_method: str
+    query_string: str
+    raw_uri: str
+    server_protocol: str
+    remote_addr: str
+    remote_port: str
+    server_name: str
+    server_port: str
+    path_info: str
+    script_name: str
+    body: str
+    body_json: dict
+    http_host: str
+    http_connection: str
+    http_cache_control: str
+    http_sec_ch_ua: str
+    http_sec_ch_ua_mobile: str
+    http_sec_ch_ua_platform: str
+    http_upgrade_insecure_requests: str
+    http_user_agent: str
+    http_accept: str
+    http_sec_gpc: str
+    http_accept_language: str
+    http_sec_fetch_site: str
+    http_sec_fetch_mode: str
+    http_sec_fetch_user: str
+    http_sec_fetch_dest: str
+    http_accept_encoding: str
+    http_content_type: str
