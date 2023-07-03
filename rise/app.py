@@ -85,7 +85,7 @@ class App(AppHelpers):
             else:
                 setattr(request_context, key.lower(), env[key])
 
-        request_context.http_content_type = env["CONTENT_TYPE"]
+        request_context.http_content_type = env.get("CONTENT_TYPE")
         request_context.body = env["wsgi.input"].read().decode()
 
         if request_context.http_content_type == "application/json":
